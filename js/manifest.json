@@ -1,0 +1,6 @@
+{
+  "short_name": "12orLessChars",
+  "name": "Full Name of App Here",
+  "theme_color": "rgba(255, 255, 0, 1.0)",
+  "start_url": "index.html?launcher=true"
+}
