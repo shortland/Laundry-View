@@ -4,9 +4,10 @@ use strict;
 use warnings;
 use HTTP::Request;
 use LWP::UserAgent;
+use JSON;
 
 sub quadBuildings {
-	my ($quadName, $quadNameNext) = @_;
+	my ($quadName, $jsonObj) = @_;
 	my $baseURL = "http://classic.laundryview.com/lvs.php";
 	my $raw = getData($baseURL);
 	my @splitChunks = split(/<div class="h4" style="cursor:hand;cursor:pointer;" onclick="/m, $raw);
@@ -17,20 +18,19 @@ sub quadBuildings {
 		if (defined $1) {
 			my $found = $1;
 			if ($found =~ /^$quadName$/) {
-				print $found . "\n";
+				#print $found . "\n";
 				my @buildingNames = ($splitChunks[$i] =~ m/<a href="laundry_room.php\?lr=[\d]+" class="\w-\w+">\s*(\w+\s*\w*\s*-*\s*\w*\s*\d*)/g);
 				my @buildingCodes = ($splitChunks[$i] =~ m/<a href="laundry_room.php\?lr=(\d+)/g);
+
 				my $c = 0;
 				for my $n (@buildingNames) {
-					print "\t" . $n . " (". $buildingCodes[$c++]. ")\n";
+					#print "\t" . $n . " (". $buildingCodes[$c++]. ")\n";
 				}
 				last;
 			}
 		}
 		$i++;
 	}
-	#my %namesAndCodes;
-	#$namesAndCodes{'names'} = [$];
 
 	return ("apple", "orange", "potato");
 }
@@ -53,14 +53,14 @@ sub getData {
 BEGIN {
 	my %buildingQuads;
 	my @quads = quadNames();
-
+	my $jsonObj = {
+		quads => [{name => "mendy", buildings => [1, 2, 3, 4], ids => [11, 22, 33, 44]}, {name => "irving", buildings => [1, 2, 3, 4], ids => [11, 22, 33, 44]}, {name => "amann", buildings => [1, 2, 3, 4], ids => [11, 22, 33, 44]}]
+	};
 	for (my $i = 0; $i < scalar(@quads); $i++) {
-		$buildingQuads{$quads[$i]} = [quadBuildings($quads[$i], $quads[$i+1])];
+		$buildingQuads{$quads[$i]} = [quadBuildings($quads[$i], $jsonObj)];
 	}
-
-	#print $buildingQuads{"MENDELSOHN QUAD"}[1];
-
-	#use Data::Dumper;
-	#print Dumper %buildingQuads;
-	#print scalar @{$buildingQuads{"ROTH QUAD"}};
+	#$jsonObj = decode_json($jsonObj);
+	print $jsonObj->{quads}[0]{name} . " <Qname\n";
+	print $jsonObj->{quads}[0]{buildings}[3] . " <building#4\n";
+	print $jsonObj->{quads}[0]{ids}[3] . " <id#44\n";
 }
