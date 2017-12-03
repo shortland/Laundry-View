@@ -9,10 +9,29 @@ sub quadBuildings {
 	my ($quadName, $quadNameNext) = @_;
 	my $baseURL = "http://classic.laundryview.com/lvs.php";
 	my $raw = getData($baseURL);
-	my @splitLine = split(/<div class="h4" style="cursor:hand;cursor:pointer;" onclick="/m, $raw);
-	use Data::Dumper;
-	print Dumper @splitLine;
-	
+	my @splitChunks = split(/<div class="h4" style="cursor:hand;cursor:pointer;" onclick="/m, $raw);
+
+	my $i = 0;
+	for my $chunk (@splitChunks) {
+		$chunk =~ m/uptween\(['a-z0-9,]+\);">\s*(\w+-*\s*\w+)/g;
+		if (defined $1) {
+			my $found = $1;
+			if ($found =~ /^$quadName$/) {
+				print $found . "\n";
+				my @buildingNames = ($splitChunks[$i] =~ m/<a href="laundry_room.php\?lr=[\d]+" class="\w-\w+">\s*(\w+\s*\w*\s*-*\s*\w*\s*\d*)/g);
+				my @buildingCodes = ($splitChunks[$i] =~ m/<a href="laundry_room.php\?lr=(\d+)/g);
+				my $c = 0;
+				for my $n (@buildingNames) {
+					print "\t" . $n . " (". $buildingCodes[$c++]. ")\n";
+				}
+				last;
+			}
+		}
+		$i++;
+	}
+	#my %namesAndCodes;
+	#$namesAndCodes{'names'} = [$];
+
 	return ("apple", "orange", "potato");
 }
 
@@ -37,10 +56,9 @@ BEGIN {
 
 	for (my $i = 0; $i < scalar(@quads); $i++) {
 		$buildingQuads{$quads[$i]} = [quadBuildings($quads[$i], $quads[$i+1])];
-		last;
 	}
 
-	print $buildingQuads{"MENDELSOHN QUAD"}[1];
+	#print $buildingQuads{"MENDELSOHN QUAD"}[1];
 
 	#use Data::Dumper;
 	#print Dumper %buildingQuads;
