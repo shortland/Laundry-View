@@ -1,5 +1,6 @@
 #!/usr/bin/perl
 
+use 5.014;
 use strict;
 use warnings;
 use HTTP::Request;
@@ -24,7 +25,7 @@ sub renewLocationData {
 	}
 	path("js/location_data.json")->spew(encode_json($jsonObj));
 	chmod 0777, "js/location_data.json" or die "Couldn't chmod js/location_data.json: $!";
-	return "location_data.json has been refreshed with new data</br>\n";
+	return "Data file has been updated</br>\n";
 }
 
 sub quadBuildings {
@@ -88,23 +89,30 @@ BEGIN {
 	}
 
 	my $capitalizeSchool = uc(substr($defaultSchool, 0, 1)) . substr($defaultSchool, 1);
+	my $didIt = renewLocationData($defaultSchool, setSession($defaultSchool));
 	print my $html = 
-qq{<!DOCTYPE html>
-<html lang="en">
-<head>
-	<title>$capitalizeSchool Alerts</title>
-	<link rel="manifest" href="js/manifest.json">
-	<meta name="viewport" content="user-scalable=no, initial-scale=1, maximum-scale=1, minimum-scale=1, width=device-width, height=device-height, target-densitydpi=device-dpi" />
-	<script type="text/javascript" src='js/jquery.js'></script>
-	<script type="text/javascript" src='js/jquery_colors.js'></script>
-	<script type="text/javascript" src='js/script.js'></script>
-	<link rel="stylesheet" type="text/css" href="css/style.css">
-</head>
-<body>
-	<center>
-		<h3>School: <i>$capitalizeSchool</i></h3>
-	</center>
-</body>
-</html>};
-	print renewLocationData($defaultSchool, setSession($defaultSchool));
+	qq{<!DOCTYPE html>
+	<html lang="en">
+	<head>
+		<title>$capitalizeSchool Alerts</title>
+		<link rel="manifest" href="js/manifest.json">
+		<meta name="viewport" content="user-scalable=no, initial-scale=1, maximum-scale=1, minimum-scale=1, width=device-width, height=device-height, target-densitydpi=device-dpi" />
+		<script type="text/javascript" src='js/jquery.js'></script>
+		<script type="text/javascript" src='js/jquery_colors.js'></script>
+		<script type="text/javascript" src='js/script.js'></script>
+		<link rel="stylesheet" type="text/css" href="css/style.css">
+	</head>
+	<body>
+		<center>
+			<h3>Location: <i>$capitalizeSchool</i></h3>
+			<p>$didIt</p>
+			<form method='get' action=''>
+				<p>Location*: <input type='text' placeholder='exact url location' name='s'/></p>
+				<input type='submit' value='submit'/>
+			</form>
+			</br></br>
+			<p>*Location: If you're using Laundry View, you should have a link to go to your school/location view. ie: http://laundryview.com/stonybrook.</br>Put 'stonybrook' as your location. Another example: http://laundryview.com/ubridgeport (put ubridgeport as location)/p>
+		</center>
+	</body>
+	</html>} =~ s/^\t//rmg;
 }
